@@ -7,6 +7,9 @@ import { ConfigModule } from '@nestjs/config';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 
 import { RestaurantsModule } from './restaurants/restaurants.module';
+import { UsersModule } from './users/users.module';
+import { CommonModule } from './common/common.module';
+import { User } from 'src/users/entities/user.entity';
 
 console.log('JOI', Joi);
 @Module({
@@ -33,13 +36,15 @@ console.log('JOI', Joi);
       database: process.env.DB_DATABASE,
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: true,
-      entities: [Restaurant],
+      entities: [Restaurant, User],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
     }),
     RestaurantsModule,
+    UsersModule,
+    CommonModule,
   ],
   controllers: [],
   providers: [],
