@@ -49,9 +49,9 @@ console.log('JOI', Joi);
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
-      context: ({ req }) => {
-        user: req['user'];
-      },
+      context: ({ req }) => ({
+        user: req['user'],
+      }),
     }),
     JwtModule.forRoot({ privateKey: process.env.PRIVATE_KEY }),
     RestaurantsModule,
@@ -65,7 +65,7 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(JwtMiddleware).forRoutes({
       path: '/graphql',
-      method: RequestMethod.ALL,
+      method: RequestMethod.POST,
     });
   }
 }

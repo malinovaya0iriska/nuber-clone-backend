@@ -14,9 +14,11 @@ export class UserResolver {
 
   @Query((returns) => User)
   me(@Context() context) {
-    console.log(context);
-
-    return true;
+    if (!context.user) {
+      return;
+    } else {
+      return context.user;
+    }
   }
 
   @Mutation((returns) => CreateAccountOutput)
