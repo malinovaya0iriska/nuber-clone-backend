@@ -6,14 +6,17 @@ import {
   CreateAccountInput,
   CreateAccountOutput,
 } from 'src/users/dtos/create-account.dto';
-import { LoginInput } from './dtos/login.dto';
-import { LoginOutput } from 'src/users/dtos/login.dto';
+import { LoginInput, LoginOutput } from 'src/users/dtos/login.dto';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from 'src/jwt/jwt.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly users: Repository<User>,
+    private readonly config: ConfigService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async createAccountSer({
@@ -34,6 +37,7 @@ export class UserService {
       return { ok: false, error: "Could't create an account" };
     }
   }
+
   async login({ email, password }: LoginInput): Promise<LoginOutput> {
     try {
       const user: User = await this.users.findOneBy({ email });
@@ -45,9 +49,13 @@ export class UserService {
       if (!isPasswodCorrect) {
         return { ok: false, error: 'Wrong password' };
       }
-      return { ok: true, token: 'lalala' };
+      const token = this.jwtService.sign(user.id);
+      return { ok: true, token };
     } catch (error) {
       return { ok: false, error: "Could't log in. Try again later." };
     }
+  }
+  async findUserById(id: number): Promise<User> {
+    return this.users.findOneBy({ id });
   }
 }
