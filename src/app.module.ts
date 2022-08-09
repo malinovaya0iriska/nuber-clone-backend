@@ -17,6 +17,7 @@ import { CommonModule } from './common/common.module';
 import { User } from 'src/users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from 'src/jwt/jwt.middleware';
+import { AuthModule } from './auth/auth.module';
 
 console.log('JOI', Joi);
 @Module({
@@ -57,6 +58,7 @@ console.log('JOI', Joi);
     RestaurantsModule,
     UsersModule,
     CommonModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
