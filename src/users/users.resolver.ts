@@ -14,6 +14,8 @@ import {
   UserProfileInput,
   UserProfileOutput,
 } from 'src/users/dtos/user-profile.dto';
+import { EditProfileOutput } from 'src/users/dtos/edit-profile.dto';
+import { EditProfileInput } from './dtos/edit-profile.dto';
 
 @Resolver((of) => User)
 export class UserResolver {
@@ -63,6 +65,23 @@ export class UserResolver {
       };
     } catch (error) {
       return { ok: false, error: 'User Not Found' };
+    }
+  }
+
+  @Mutation((returns) => EditProfileOutput)
+  @UseGuards(AuthGuard)
+  async editProfile(
+    @AuthUser() authUser: User,
+    @Args('input') EditProfileInput: EditProfileInput,
+  ): Promise<EditProfileOutput> {
+    try {
+      await this.usersService.editProfile(authUser.id, EditProfileInput);
+      return { ok: true };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
     }
   }
 }
