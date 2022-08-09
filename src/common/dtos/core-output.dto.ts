@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType({ isAbstract: true })
-export class MutationOutput {
+export class CoreOutput {
   @Field((type) => Boolean)
   ok: boolean;
 
