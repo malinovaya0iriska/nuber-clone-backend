@@ -16,6 +16,10 @@ import {
 } from 'src/users/dtos/user-profile.dto';
 import { EditProfileOutput } from 'src/users/dtos/edit-profile.dto';
 import { EditProfileInput } from './dtos/edit-profile.dto';
+import {
+  VerifyEmailInput,
+  VerifyEmailOutput,
+} from 'src/users/dtos/verify-email.dto';
 
 @Resolver((of) => User)
 export class UserResolver {
@@ -76,6 +80,21 @@ export class UserResolver {
   ): Promise<EditProfileOutput> {
     try {
       await this.usersService.editProfile(authUser.id, EditProfileInput);
+      return { ok: true };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
+
+  @Mutation((returns) => VerifyEmailOutput)
+  async verifyEmail(
+    @Args('input') verifyEmailInput: VerifyEmailInput,
+  ): Promise<VerifyEmailOutput> {
+    try {
+      this.usersService.verifyEmail(verifyEmailInput.code);
       return { ok: true };
     } catch (error) {
       return {

@@ -7,19 +7,17 @@ import {
   CreateAccountOutput,
 } from 'src/users/dtos/create-account.dto';
 import { LoginInput, LoginOutput } from 'src/users/dtos/login.dto';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from 'src/jwt/jwt.service';
-import {
-  EditProfileInput,
-  EditProfileOutput,
-} from 'src/users/dtos/edit-profile.dto';
+import { EditProfileInput } from 'src/users/dtos/edit-profile.dto';
+import { Verification } from 'src/users/entities/verification.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly users: Repository<User>,
-    private readonly config: ConfigService,
+    @InjectRepository(Verification)
+    private readonly verifications: Repository<Verification>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -34,8 +32,10 @@ export class UserService {
         return { ok: false, error: 'User with this email has been registered' };
       }
 
-      await this.users.save(this.users.create({ email, password, role }));
-
+      const user = await this.users.save(
+        this.users.create({ email, password, role }),
+      );
+      await this.verifications.save(this.verifications.create({ user }));
       return { ok: true };
     } catch (e) {
       return { ok: false, error: "Could't create an account" };
@@ -44,7 +44,14 @@ export class UserService {
 
   async login({ email, password }: LoginInput): Promise<LoginOutput> {
     try {
-      const user: User = await this.users.findOneBy({ email });
+      const users: User[] = await this.users.find({
+        where: {
+          email,
+        },
+        select: { password: true, id: true },
+      });
+
+      const user = users.pop();
       if (!user) {
         return { ok: false, error: 'User not found' };
       }
@@ -75,5 +82,21 @@ export class UserService {
       user.password = password;
     }
     return this.users.save(user);
+  }
+
+  async verifyEmail(code: string): Promise<boolean> {
+    try {
+      const verification = await this.verifications.find({
+        relations: ['user'],
+      });
+      if (verification.length) {
+        const user = verification.pop().user;
+        user.verified = true;
+        this.users.save(user);
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }
