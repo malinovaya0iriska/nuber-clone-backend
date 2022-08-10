@@ -8,8 +8,13 @@ import {
 } from 'src/users/dtos/create-account.dto';
 import { LoginInput, LoginOutput } from 'src/users/dtos/login.dto';
 import { JwtService } from 'src/jwt/jwt.service';
-import { EditProfileInput } from 'src/users/dtos/edit-profile.dto';
+import {
+  EditProfileInput,
+  EditProfileOutput,
+} from 'src/users/dtos/edit-profile.dto';
 import { Verification } from 'src/users/entities/verification.entity';
+import { UserProfileOutput } from 'src/users/dtos/user-profile.dto';
+import { VerifyEmailOutput } from 'src/users/dtos/verify-email.dto';
 
 @Injectable()
 export class UserService {
@@ -21,7 +26,7 @@ export class UserService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async createAccountSer({
+  async createAccount({
     email,
     password,
     role,
@@ -44,14 +49,13 @@ export class UserService {
 
   async login({ email, password }: LoginInput): Promise<LoginOutput> {
     try {
-      const users: User[] = await this.users.find({
+      const user: User = await this.users.findOne({
         where: {
           email,
         },
         select: { password: true, id: true },
       });
 
-      const user = users.pop();
       if (!user) {
         return { ok: false, error: 'User not found' };
       }
@@ -66,37 +70,63 @@ export class UserService {
       return { ok: false, error: "Could't log in. Try again later." };
     }
   }
-  async findUserById(id: number): Promise<User> {
-    return this.users.findOneBy({ id });
+  async findUserById(id: number): Promise<UserProfileOutput> {
+    try {
+      const user = await this.users.findOneBy({ id });
+      if (user) {
+        return {
+          ok: true,
+          user,
+        };
+      }
+      throw new Error();
+    } catch (error) {
+      return { ok: false, error: 'User Not Found' };
+    }
   }
 
   async editProfile(
     userId: number,
     { email, password }: EditProfileInput,
-  ): Promise<User> {
-    const user: User = await this.users.findOneBy({ id: userId });
-    if (email) {
-      user.email = email;
+  ): Promise<EditProfileOutput> {
+    try {
+      const user: User = await this.users.findOneBy({ id: userId });
+      if (email) {
+        user.email = email;
+      }
+      if (password) {
+        user.password = password;
+      }
+      await this.users.save(user);
+      return { ok: true };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
     }
-    if (password) {
-      user.password = password;
-    }
-    return this.users.save(user);
   }
 
-  async verifyEmail(code: string): Promise<boolean> {
+  async verifyEmail(code: string): Promise<VerifyEmailOutput> {
     try {
-      const verification = await this.verifications.find({
+      const verification = await this.verifications.findOne({
+        where: { code },
         relations: ['user'],
       });
-      if (verification.length) {
-        const user = verification.pop().user;
-        user.verified = true;
-        this.users.save(user);
+
+      if (verification) {
+        verification.user.verified = true;
+        await this.users.save(verification.user);
+        await this.verifications.delete(verification.id);
+
+        return { ok: true };
       }
-      return true;
-    } catch (e) {
-      return false;
+      return { ok: false, error: 'Verification not found' };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
     }
   }
 }
