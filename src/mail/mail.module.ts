@@ -1,22 +1,22 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
-import { JwtModuleOptions } from 'src/jwt/interfaces/jwt.nterface';
-import { JwtService } from 'src/jwt/jwt.service';
 import { CONFIG_OPTIONS } from 'src/common/common.constants';
+import { MailModuleOptions } from 'src/mail/mail.interfaces';
+import { MailService } from 'src/mail/mail.service';
 
 @Module({})
 @Global()
-export class JwtModule {
-  static forRoot(options: JwtModuleOptions): DynamicModule {
+export class MailModule {
+  static forRoot(options: MailModuleOptions): DynamicModule {
     return {
-      module: JwtModule,
+      module: MailModule,
       providers: [
         {
           provide: CONFIG_OPTIONS,
           useValue: options,
         },
-        JwtService,
+        MailService,
       ],
-      exports: [JwtService],
+      exports: [MailService],
     };
   }
 }

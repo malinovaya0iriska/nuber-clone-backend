@@ -26,5 +26,12 @@
   },
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-}
+},
+"terminal.integrated.defaultProfile.windows": "Node.js",
+"terminal.integrated.profiles.windows": {
+    "Node.js": {
+      "path": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [] 
+    }
+  }
 }
