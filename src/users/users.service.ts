@@ -112,7 +112,7 @@ export class UserService {
     } catch (error) {
       return {
         ok: false,
-        error,
+        error: "Couldn't update profile",
       };
     }
   }
@@ -135,7 +135,7 @@ export class UserService {
     } catch (error) {
       return {
         ok: false,
-        error,
+        error: "Couldn't verify email",
       };
     }
   }
