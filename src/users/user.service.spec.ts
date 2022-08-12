@@ -12,6 +12,7 @@ const mockRepository = () => ({
   delete: jest.fn(),
   findOneBy: jest.fn(),
   findOne: jest.fn(),
+  findOneOrFail: jest.fn(),
   save: jest.fn(),
 });
 
@@ -155,6 +156,7 @@ describe('UserService', () => {
 
       expect(result).toEqual({ ok: false, error: 'Wrong password' });
     });
+
     it('should return token if the password correct', async () => {
       const mockedUser = {
         id: 1,
@@ -169,7 +171,21 @@ describe('UserService', () => {
     });
   });
 
-  it.todo('findUserById');
-  it.todo('editProfile');
+  describe('findUserById', () => {
+    it('should find an existing user', async () => {
+      usersRepository.findOneOrFail.mockResolvedValue({ id: 1 });
+      const result = await service.findUserById(1);
+
+      expect(result).toEqual({ ok: true, user: { id: 1 } });
+    });
+    it('should fail if no user is found', async () => {
+      usersRepository.findOneOrFail.mockRejectedValue(new Error());
+      const result = await service.findUserById(1);
+
+      expect(result).toEqual({ ok: false, error: 'User Not Found' });
+    });
+  });
+
+  // describe('editProfile', () => {});
   it.todo('verifyEmail');
-});
+};);
