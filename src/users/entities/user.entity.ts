@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Field,
   InputType,
@@ -24,22 +25,22 @@ registerEnumType(UserRole, { name: 'UserRole' });
 export class User extends CoreEntity {
   @Column()
   @IsEmail()
-  @Field((type) => String)
+  @Field((_type) => String)
   email: string;
 
   @Column({ select: false })
   @IsString()
-  @Field((type) => String)
+  @Field((_type) => String)
   password: string;
 
   @Column({ type: 'enum', enum: UserRole })
   @IsEnum(UserRole)
-  @Field((type) => UserRole)
+  @Field((_type) => UserRole)
   role: UserRole;
 
   @Column({ default: false })
   @IsBoolean()
-  @Field((type) => Boolean)
+  @Field((_type) => Boolean)
   verified: boolean;
 
   @BeforeInsert()
