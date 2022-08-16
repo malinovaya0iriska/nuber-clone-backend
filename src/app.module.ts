@@ -18,6 +18,7 @@ import { JwtModule } from 'src/jwt/jwt.module';
 import { JwtMiddleware } from 'src/jwt/jwt.middleware';
 import { Verification } from 'src/users/entities/verification.entity';
 import { MailModule } from 'src/mail/mail.module';
+import { Category } from 'src/restaurants/entities/category.entity';
 
 // console.log('JOI', Joi);
 @Module({
@@ -48,7 +49,7 @@ import { MailModule } from 'src/mail/mail.module';
       database: process.env.DB_DATABASE,
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: true,
-      entities: [Restaurant, User, Verification],
+      entities: [Restaurant, User, Verification, Category],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
