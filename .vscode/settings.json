@@ -27,6 +27,7 @@
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
 },
+"typescript.updateImportsOnFileMove.enabled": "always",
 "terminal.integrated.defaultProfile.windows": "Node.js",
 "terminal.integrated.profiles.windows": {
     "Node.js": {

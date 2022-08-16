@@ -2,8 +2,8 @@ import { Args, Mutation, Query } from '@nestjs/graphql';
 import { Resolver } from '@nestjs/graphql';
 import { CreateRestaurantDto } from 'src/restaurants/dtos/create-restaurant.dto';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
-import { RestaurantService } from './restaurants.service';
-import { UpdateRestaurantDto } from './dtos/update-restaurant.dto';
+import { RestaurantService } from 'src/restaurants/restaurants.service';
+import { UpdateRestaurantDto } from 'src/restaurants/dtos/update-restaurant.dto';
 
 @Resolver((of) => Restaurant)
 export class RestaurantResolver {

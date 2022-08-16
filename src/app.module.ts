@@ -11,17 +11,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 
-import { RestaurantsModule } from './restaurants/restaurants.module';
-import { UsersModule } from './users/users.module';
-import { CommonModule } from './common/common.module';
+import { RestaurantsModule } from 'src/restaurants/restaurants.module';
+import { UsersModule } from 'src/users/users.module';
 import { User } from 'src/users/entities/user.entity';
-import { JwtModule } from './jwt/jwt.module';
+import { JwtModule } from 'src/jwt/jwt.module';
 import { JwtMiddleware } from 'src/jwt/jwt.middleware';
-import { AuthModule } from './auth/auth.module';
 import { Verification } from 'src/users/entities/verification.entity';
-import { MailModule } from './mail/mail.module';
+import { MailModule } from 'src/mail/mail.module';
 
-console.log('JOI', Joi);
+// console.log('JOI', Joi);
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -29,7 +27,7 @@ console.log('JOI', Joi);
       envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.test',
       ignoreEnvFile: process.env.NODE_ENV === 'prod',
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid('dev', 'prod'),
+        NODE_ENV: Joi.string().valid('dev', 'prod', 'test').required(),
         DB_HOST: Joi.string().required(),
         DB_PORT: Joi.string().required(),
         DB_USERNAME: Joi.string().required(),
