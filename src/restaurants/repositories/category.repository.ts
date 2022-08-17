@@ -1,7 +1,8 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Category } from 'src/restaurants/entities/category.entity';
+import { CustomRepository } from 'src/customRepository/typeorm-ex.decorator';
 
-@EntityRepository(Category)
+@CustomRepository(Category)
 export class CategoryRepository extends Repository<Category> {
   async getOrCreate(name: string) {
     const categoryName = name.trim().toLowerCase();
