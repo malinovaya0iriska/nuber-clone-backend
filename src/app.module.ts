@@ -19,6 +19,7 @@ import { JwtMiddleware } from 'src/jwt/jwt.middleware';
 import { Verification } from 'src/users/entities/verification.entity';
 import { MailModule } from 'src/mail/mail.module';
 import { Category } from 'src/restaurants/entities/category.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 // console.log('JOI', Joi);
 @Module({
@@ -64,6 +65,7 @@ import { Category } from 'src/restaurants/entities/category.entity';
       domain: process.env.MAILGUN_DOMAIN_NAME,
       fromEmail: process.env.MAILGUN_FROM_EMAIL,
     }),
+    AuthModule,
     RestaurantsModule,
     UsersModule,
   ],
