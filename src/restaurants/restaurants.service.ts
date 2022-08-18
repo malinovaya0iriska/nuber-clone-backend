@@ -18,6 +18,11 @@ import {
   DeleteRestaurantOutput,
 } from 'src/restaurants/dtos/delete-restaurant.dto';
 import { AllCategoriesOutput } from 'src/restaurants/dtos/all-categories.dto';
+import { CategoryOutput } from 'src/restaurants/dtos/category.dto';
+import { CategoryInput } from './dtos/category.dto';
+import { timeStamp } from 'console';
+import { AMOUNT_PER_PAGE } from 'src/common/common.constants';
+import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -122,5 +127,62 @@ export class RestaurantService {
 
   countRestaurants(slug: string): Promise<number> {
     return this.restaurants.count({ where: { category: { slug } } });
+  }
+
+  async findCategoryBySlug({
+    slug,
+    page,
+  }: CategoryInput): Promise<CategoryOutput> {
+    try {
+      const category = await this.categories.findOne({
+        where: { slug },
+      });
+      if (!category) {
+        return {
+          ok: false,
+          error: 'Category not found',
+        };
+      }
+      const restaurants = await this.restaurants.find({
+        where: { category: { slug } },
+        take: AMOUNT_PER_PAGE,
+        skip: --page * AMOUNT_PER_PAGE,
+      });
+
+      category.restaurants = restaurants;
+      const totalResults = await this.countRestaurants(category.slug);
+
+      return {
+        ok: true,
+        category,
+        totalPages: Math.ceil(totalResults / AMOUNT_PER_PAGE),
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Could not load this category',
+      };
+    }
+  }
+  async getAllRestaurants({
+    page,
+  }: RestaurantsInput): Promise<RestaurantsOutput> {
+    try {
+      const [restaurants, totalResults] = await this.restaurants.findAndCount({
+        skip: --page * AMOUNT_PER_PAGE,
+        take: AMOUNT_PER_PAGE,
+      });
+      return {
+        ok: true,
+        results: restaurants,
+        totalPages: Math.ceil(totalResults / AMOUNT_PER_PAGE),
+        totalResults,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Could not load restaurants',
+      };
+    }
   }
 }
