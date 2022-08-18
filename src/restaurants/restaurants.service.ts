@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import {
   CreateRestaurantInput,
   CreateRestaurantOutput,
@@ -23,6 +23,14 @@ import { CategoryInput } from './dtos/category.dto';
 import { timeStamp } from 'console';
 import { AMOUNT_PER_PAGE } from 'src/common/common.constants';
 import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
+import {
+  RestaurantInput,
+  RestaurantOutput,
+} from 'src/restaurants/dtos/restaurant.dto';
+import {
+  SearchRestaurantInput,
+  SearchRestaurantOutput,
+} from 'src/restaurants/dtos/search-restaurant.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -182,6 +190,56 @@ export class RestaurantService {
       return {
         ok: false,
         error: 'Could not load restaurants',
+      };
+    }
+  }
+
+  async findRestaurantById({
+    restarauntId,
+  }: RestaurantInput): Promise<RestaurantOutput> {
+    try {
+      const restaurant = await this.restaurants.findOne({
+        where: { id: restarauntId },
+      });
+      if (!restaurant) {
+        return {
+          ok: false,
+          error: 'Restaurant is not found',
+        };
+      }
+      return {
+        ok: true,
+        restaurant,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Could not load restaurant',
+      };
+    }
+  }
+
+  async findRestaurantByName({
+    query,
+    page,
+  }: SearchRestaurantInput): Promise<SearchRestaurantOutput> {
+    try {
+      const [restaurants, totalResults] = await this.restaurants.findAndCount({
+        where: { name: ILike(`%${query}%`) },
+        skip: --page * AMOUNT_PER_PAGE,
+        take: AMOUNT_PER_PAGE,
+      });
+
+      return {
+        ok: true,
+        restaurants,
+        totalResults,
+        totalPages: Math.ceil(totalResults / AMOUNT_PER_PAGE),
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Could not search for restaurants',
       };
     }
   }
