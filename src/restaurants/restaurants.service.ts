@@ -35,6 +35,14 @@ import {
   CreateDishOutput,
 } from 'src/restaurants/dtos/create-dish.dto';
 import { Dish } from 'src/restaurants/entities/dish.entity';
+import {
+  EditDishInput,
+  EditDishOutput,
+} from 'src/restaurants/dtos/edit-dish.dto';
+import {
+  DeleteDishInput,
+  DeleteDishOutput,
+} from 'src/restaurants/dtos/delete-dish.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -280,6 +288,68 @@ export class RestaurantService {
       return { ok: true };
     } catch (error) {
       return { ok: false, error: 'Could not create a dish' };
+    }
+  }
+
+  async editDish(
+    owner: User,
+    editDishInput: EditDishInput,
+  ): Promise<EditDishOutput> {
+    try {
+      const dish = await this.dishes.findOne({
+        where: { id: editDishInput.dishId },
+        relations: ['restaurant'],
+      });
+
+      if (!dish) {
+        return { ok: false, error: 'Dish not found' };
+      }
+      if (owner.id !== dish.restaurant.ownerId) {
+        return {
+          ok: false,
+          error: "You can't delete a dish in the restaurant that you don't own",
+        };
+      }
+      await this.dishes.save([
+        {
+          id: editDishInput.dishId,
+          ...editDishInput,
+          options: editDishInput.options && [
+            ...editDishInput.options.map((o) => ({ ...o })),
+          ],
+        },
+      ]);
+
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error: 'Could not edit a dish' };
+    }
+  }
+
+  async deleteDish(
+    owner: User,
+    { dishId }: DeleteDishInput,
+  ): Promise<DeleteDishOutput> {
+    try {
+      const dish = await this.dishes.findOne({
+        where: { id: dishId },
+        relations: ['restaurant'],
+      });
+
+      if (!dish) {
+        return { ok: false, error: 'Dish not found' };
+      }
+      if (owner.id !== dish.restaurant.ownerId) {
+        return {
+          ok: false,
+          error: "You can't delete a dish in the restaurant that you don't own",
+        };
+      }
+      await this.dishes.delete(dishId);
+
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error: 'Could not edit a dish' };
     }
   }
 }
