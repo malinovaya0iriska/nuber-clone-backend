@@ -20,7 +20,6 @@ import {
 import { AllCategoriesOutput } from 'src/restaurants/dtos/all-categories.dto';
 import { CategoryOutput } from 'src/restaurants/dtos/category.dto';
 import { CategoryInput } from './dtos/category.dto';
-import { timeStamp } from 'console';
 import { AMOUNT_PER_PAGE } from 'src/common/common.constants';
 import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
 import {
@@ -31,12 +30,19 @@ import {
   SearchRestaurantInput,
   SearchRestaurantOutput,
 } from 'src/restaurants/dtos/search-restaurant.dto';
+import {
+  CreateDishInput,
+  CreateDishOutput,
+} from 'src/restaurants/dtos/create-dish.dto';
+import { Dish } from 'src/restaurants/entities/dish.entity';
 
 @Injectable()
 export class RestaurantService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurants: Repository<Restaurant>,
+    @InjectRepository(Dish)
+    private readonly dishes: Repository<Dish>,
     private readonly categories: CategoryRepository,
   ) {}
   async createRestaurant(
@@ -200,6 +206,7 @@ export class RestaurantService {
     try {
       const restaurant = await this.restaurants.findOne({
         where: { id: restarauntId },
+        relations: ['menu'],
       });
       if (!restaurant) {
         return {
@@ -241,6 +248,38 @@ export class RestaurantService {
         ok: false,
         error: 'Could not search for restaurants',
       };
+    }
+  }
+
+  async createDish(
+    owner: User,
+    createDishInput: CreateDishInput,
+  ): Promise<CreateDishOutput> {
+    try {
+      const restaurant = await this.restaurants.findOne({
+        where: { id: createDishInput.restaurantId },
+      });
+
+      if (!restaurant) {
+        return { ok: false, error: 'Restaurant not found' };
+      }
+
+      if (owner.id !== (await restaurant).ownerId) {
+        return {
+          ok: false,
+          error: 'You can not create a dish in restaurant not to own',
+        };
+      }
+      await this.dishes.save(
+        this.dishes.create({
+          ...createDishInput,
+          restaurant,
+        }),
+      );
+
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error: 'Could not create a dish' };
     }
   }
 }

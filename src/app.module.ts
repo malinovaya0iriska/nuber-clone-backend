@@ -20,6 +20,7 @@ import { Verification } from 'src/users/entities/verification.entity';
 import { MailModule } from 'src/mail/mail.module';
 import { Category } from 'src/restaurants/entities/category.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { Dish } from 'src/restaurants/entities/dish.entity';
 
 // console.log('JOI', Joi);
 @Module({
@@ -49,8 +50,9 @@ import { AuthModule } from 'src/auth/auth.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       synchronize: process.env.NODE_ENV !== 'prod',
-      logging: true,
-      entities: [Restaurant, User, Verification, Category],
+      logging:
+        process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test',
+      entities: [Restaurant, User, Verification, Category, Dish],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
