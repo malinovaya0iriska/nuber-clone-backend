@@ -5,6 +5,7 @@ import { CoreEntity } from 'src/common/entities/core.entity';
 import { Category } from 'src/restaurants/entities/category.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Dish } from 'src/restaurants/entities/dish.entity';
+import { Order } from 'src/orders/entities/order.entity';
 
 @InputType('RestaurantInputType', { isAbstract: true })
 @ObjectType()
@@ -42,9 +43,11 @@ export class Restaurant extends CoreEntity {
   @IsString()
   address: string;
 
-  @Field((type) => [Dish], { nullable: true })
-  @OneToMany((type) => Dish, (dish) => dish.restaurant, {
-    onDelete: 'CASCADE',
-  })
+  @Field((type) => [Dish])
+  @OneToMany((type) => Dish, (dish) => dish.restaurant)
   menu: Dish[];
+
+  @Field((type) => [Order])
+  @OneToMany((type) => Order, (order) => order.restaurant)
+  orders: Order[];
 }
