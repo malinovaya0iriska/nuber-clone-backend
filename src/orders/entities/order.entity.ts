@@ -5,14 +5,19 @@ import {
   ObjectType,
   registerEnumType,
 } from '@nestjs/graphql';
-import { UserInputError } from 'apollo-server-express';
-import { IsEnum, IsNumber, IsString, Length } from 'class-validator';
+import { IsEnum, IsNumber } from 'class-validator';
 import { CoreEntity } from 'src/common/entities/core.entity';
 import { OrderItem } from 'src/orders/order-items.entity';
-import { Dish } from 'src/restaurants/entities/dish.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Entity, Column, ManyToMany, ManyToOne, JoinTable } from 'typeorm';
-import { Restaurant } from './../../restaurants/entities/restaurant.entity';
+import {
+  Entity,
+  Column,
+  ManyToMany,
+  ManyToOne,
+  JoinTable,
+  RelationId,
+} from 'typeorm';
+import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 
 export enum OrderStatus {
   Pending = 'Pending',
@@ -34,12 +39,18 @@ export class Order extends CoreEntity {
   })
   customer?: User;
 
+  @RelationId((order: Order) => order.customer)
+  customerID: number;
+
   @Field((type) => User, { nullable: true })
   @ManyToOne((type) => User, (user) => user.orders, {
     onDelete: 'SET NULL',
     nullable: true,
   })
   driver?: User;
+
+  @RelationId((order: Order) => order.driver)
+  driverID: number;
 
   @Field((type) => Restaurant)
   @ManyToOne((type) => Restaurant, (restaurant) => restaurant.orders, {
