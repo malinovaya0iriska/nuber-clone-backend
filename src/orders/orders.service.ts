@@ -4,7 +4,7 @@ import {
   CreateOrderInput,
   CreateOrderOutput,
 } from 'src/orders/dtos/create-order.dto';
-import { Order } from 'src/orders/entities/order.entity';
+import { Order, OrderStatus } from 'src/orders/entities/order.entity';
 import { User, UserRole } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
@@ -15,6 +15,10 @@ import {
   GetOrdersOutput,
 } from 'src/orders/dtos/get-orders.dto';
 import { GetOrderInput, GetOrderOutput } from 'src/orders/dtos/get-order.dto';
+import {
+  EditOrderInput,
+  EditOrderOutput,
+} from 'src/orders/dtos/edit-order.dto';
 
 @Injectable()
 export class OrderService {
@@ -144,6 +148,20 @@ export class OrderService {
     }
   }
 
+  haveUserAccess(user: User, order: Order): boolean {
+    let haveAccess = true;
+    if (user.role === UserRole.Client && order.customerID !== user.id) {
+      haveAccess = false;
+    }
+    if (user.role === UserRole.Delivery && order.driverID !== user.id) {
+      haveAccess = false;
+    }
+    if (user.role === UserRole.Owner && order.restaurant.ownerId !== user.id) {
+      haveAccess = false;
+    }
+    return haveAccess;
+  }
+
   async getOrder(
     user: User,
     { id: orderId }: GetOrderInput,
@@ -156,24 +174,8 @@ export class OrderService {
           error: 'Order was not found',
         };
       }
-      console.log(order);
 
-      let haveAccessToGet = true;
-      if (user.role === UserRole.Client && order.customerID !== user.id) {
-        haveAccessToGet = false;
-      }
-      if (user.role === UserRole.Delivery && order.driverID !== user.id) {
-        haveAccessToGet = false;
-      }
-      if (
-        user.role === UserRole.Owner &&
-        order.restaurant.ownerId !== user.id
-      ) {
-        console.log(order.restaurant);
-
-        haveAccessToGet = false;
-      }
-      if (!haveAccessToGet) {
+      if (!this.haveUserAccess(user, order)) {
         return {
           ok: false,
           error: 'You have no access to get this information',
@@ -183,6 +185,63 @@ export class OrderService {
     } catch (error) {
       console.log(error);
       return { ok: false, error: "Couldn't get the order" };
+    }
+  }
+
+  async editOrder(
+    user: User,
+    { id: orderId, orderStatus: status }: EditOrderInput,
+  ): Promise<EditOrderOutput> {
+    try {
+      const order = await this.orders.findOne({
+        where: { id: orderId },
+        relations: ['restaurant'],
+      });
+      if (!order) {
+        return {
+          ok: false,
+          error: 'Order was not found',
+        };
+      }
+      if (!this.haveUserAccess(user, order)) {
+        return {
+          ok: false,
+          error: 'You have no access to get this information',
+        };
+      }
+      let canEdit = true;
+      if (user.role === UserRole.Client) {
+        canEdit = false;
+      }
+      if (user.role === UserRole.Owner) {
+        if (status !== OrderStatus.Cooking && status !== OrderStatus.Cooked) {
+          canEdit = false;
+        }
+      }
+      if (user.role === UserRole.Delivery) {
+        if (
+          status !== OrderStatus.PickedUp &&
+          status !== OrderStatus.Delivered
+        ) {
+          canEdit = false;
+        }
+      }
+      if (!canEdit) {
+        return {
+          ok: false,
+          error: 'You have no access to edit the order',
+        };
+      }
+      await this.orders.save([
+        {
+          id: orderId,
+          orderStatus: status,
+        },
+      ]);
+      return { ok: true };
+    } catch (error) {
+      console.log(error);
+      return { ok: false, error: "Couldn't edit the order" };
     }
   }
 }
