@@ -3,7 +3,7 @@ import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
-import { PUB_SUB } from 'src/common/common.constants';
+import { NEW_PENDING_ORDER, PUB_SUB } from 'src/common/common.constants';
 import {
   CreateOrderInput,
   CreateOrderOutput,
@@ -64,22 +64,16 @@ export class OrderResolver {
     return this.ordersService.editOrder(user, editOrderInput);
   }
 
-  @Mutation((returns) => Boolean)
-  async potatoReady() {
-    await this.pubSub.publish('hotPotatos', {
-      readyPotato: 'Your potato is ready!',
-    });
-
-    return true;
-  }
-
-  @Subscription((returns) => String, {
-    name: 'hotPotatos',
+  @Subscription((returns) => Order, {
+    filter: ({ pendingOrders: { ownerId } }, _, { user }) => {
+      return ownerId === user.id;
+    },
+    resolve: ({ pendingOrders: { order } }) => {
+      return order;
+    },
   })
-  @Role(['Client'])
-  hotPotatos(@AuthUser() user: User) {
-    console.log(user);
-
-    return this.pubSub.asyncIterator('commentAdded');
+  @Role(['Owner'])
+  pendingOrders() {
+    return this.pubSub.asyncIterator(NEW_PENDING_ORDER);
   }
 }
