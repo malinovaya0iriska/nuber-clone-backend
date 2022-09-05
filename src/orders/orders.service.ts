@@ -26,6 +26,10 @@ import {
   NEW_PENDING_ORDER,
   PUB_SUB,
 } from 'src/common/common.constants';
+import {
+  TakeOrderInput,
+  TakeOrderOutput,
+} from 'src/orders/dtos/take-order.dto';
 
 @Injectable()
 export class OrderService {
@@ -264,6 +268,42 @@ export class OrderService {
     } catch (error) {
       console.log(error);
       return { ok: false, error: "Couldn't edit the order" };
+    }
+  }
+
+  async takeOrder(
+    driver: User,
+    { id: orderId }: TakeOrderInput,
+  ): Promise<TakeOrderOutput> {
+    try {
+      const order = await this.orders.findOneBy({ id: orderId });
+      if (!order) {
+        return {
+          ok: false,
+          error: 'Order not found',
+        };
+      }
+      if (order.driver) {
+        return {
+          ok: false,
+          error: 'This order already has a driver',
+        };
+      }
+      await this.orders.save({
+        id: orderId,
+        driver,
+      });
+      await this.pubSub.publish(NEW_ORDER_UPDATE, {
+        orderUpdates: { ...order, driver },
+      });
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: "Couldn't update the order",
+      };
     }
   }
 }
