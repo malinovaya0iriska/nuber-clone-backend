@@ -6,6 +6,7 @@ import { User } from 'src/users/entities/user.entity';
 import * as request from 'supertest';
 import { Repository } from 'typeorm';
 import { AppModule } from '../src/app.module';
+import { TOKEN_KEY } from 'src/common/common.constants';
 
 const GRAPHQL_ENDPOINT = '/graphql';
 const testUser = {
@@ -23,7 +24,7 @@ describe('User Module (e2e)', () => {
   const baseTest = () => request(app.getHttpServer()).post(GRAPHQL_ENDPOINT);
   const publicTest = (query: string) => baseTest().send({ query });
   const privateTest = (query: string) =>
-    baseTest().set('X-JWT', jwtToken).send({ query });
+    baseTest().set(TOKEN_KEY, jwtToken).send({ query });
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({

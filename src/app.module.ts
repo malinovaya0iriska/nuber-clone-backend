@@ -1,11 +1,6 @@
 import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
 import * as Joi from 'joi';
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
@@ -15,7 +10,6 @@ import { RestaurantsModule } from 'src/restaurants/restaurants.module';
 import { UsersModule } from 'src/users/users.module';
 import { User } from 'src/users/entities/user.entity';
 import { JwtModule } from 'src/jwt/jwt.module';
-import { JwtMiddleware } from 'src/jwt/jwt.middleware';
 import { Verification } from 'src/users/entities/verification.entity';
 import { MailModule } from 'src/mail/mail.module';
 import { Category } from 'src/restaurants/entities/category.entity';
@@ -24,6 +18,9 @@ import { Dish } from 'src/restaurants/entities/dish.entity';
 import { OrdersModule } from './orders/orders.module';
 import { Order } from 'src/orders/entities/order.entity';
 import { OrderItem } from 'src/orders/order-items.entity';
+import { CommonModule } from 'src/common/common.module';
+import { TOKEN_KEY } from 'src/common/common.constants';
+import { Module } from '@nestjs/common';
 
 // console.log('JOI', Joi);
 @Module({
@@ -67,10 +64,23 @@ import { OrderItem } from 'src/orders/order-items.entity';
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
+      playground: process.env.NODE_ENV !== 'production',
       autoSchemaFile: true,
-      context: ({ req }) => ({
-        user: req['user'],
-      }),
+      subscriptions: {
+        'subscriptions-transport-ws': {
+          path: '/graphql',
+          onConnect: (connectionParams): { token: string } => {
+            return { token: connectionParams[TOKEN_KEY] };
+          },
+        },
+      },
+      context: (params): { token: string } => {
+        const { req } = params;
+
+        return {
+          token: req.headers[TOKEN_KEY],
+        };
+      },
     }),
     JwtModule.forRoot({ privateKey: process.env.PRIVATE_KEY }),
     MailModule.forRoot({
@@ -82,15 +92,9 @@ import { OrderItem } from 'src/orders/order-items.entity';
     RestaurantsModule,
     UsersModule,
     OrdersModule,
+    CommonModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtMiddleware).forRoutes({
-      path: '/graphql',
-      method: RequestMethod.POST,
-    });
-  }
-}
+export class AppModule {}

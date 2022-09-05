@@ -78,7 +78,6 @@ export class OrderService {
             }
           }
         }
-        console.log(orderFinalPrice, dishFinalPrice);
         orderFinalPrice = orderFinalPrice + dishFinalPrice;
         const orderItem = await this.orderItems.save(
           this.orderItems.create({

@@ -9,7 +9,6 @@ import { Dish } from 'src/restaurants/entities/dish.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Order, Restaurant, OrderItem, Dish])],
-
   providers: [OrderService, OrderResolver],
 })
 export class OrdersModule {}
