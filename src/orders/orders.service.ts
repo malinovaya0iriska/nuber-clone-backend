@@ -20,7 +20,11 @@ import {
   EditOrderOutput,
 } from 'src/orders/dtos/edit-order.dto';
 import { PubSub } from 'graphql-subscriptions';
-import { NEW_PENDING_ORDER, PUB_SUB } from 'src/common/common.constants';
+import {
+  NEW_COOKED_ORDER,
+  NEW_PENDING_ORDER,
+  PUB_SUB,
+} from 'src/common/common.constants';
 
 @Injectable()
 export class OrderService {
@@ -201,7 +205,6 @@ export class OrderService {
     try {
       const order = await this.orders.findOne({
         where: { id: orderId },
-        relations: ['restaurant'],
       });
       if (!order) {
         return {
@@ -244,6 +247,15 @@ export class OrderService {
           orderStatus: status,
         },
       ]);
+
+      if (user.role === UserRole.Owner) {
+        if (status === OrderStatus.Cooked) {
+          await this.pubSub.publish(NEW_COOKED_ORDER, {
+            cookedOrders: { ...order, status },
+          });
+        }
+      }
+
       return { ok: true };
     } catch (error) {
       console.log(error);
