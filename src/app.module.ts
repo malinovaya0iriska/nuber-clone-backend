@@ -21,6 +21,8 @@ import { OrderItem } from 'src/orders/order-items.entity';
 import { CommonModule } from 'src/common/common.module';
 import { TOKEN_KEY } from 'src/common/common.constants';
 import { Module } from '@nestjs/common';
+import { PaymentsModule } from './payments/payments.module';
+import { Payment } from 'src/payments/entities/payment.entity';
 
 // console.log('JOI', Joi);
 @Module({
@@ -60,6 +62,7 @@ import { Module } from '@nestjs/common';
         Dish,
         Order,
         OrderItem,
+        Payment,
       ],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
@@ -93,6 +96,7 @@ import { Module } from '@nestjs/common';
     UsersModule,
     OrdersModule,
     CommonModule,
+    PaymentsModule,
   ],
   controllers: [],
   providers: [],
