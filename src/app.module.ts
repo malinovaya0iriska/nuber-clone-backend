@@ -23,6 +23,7 @@ import { TOKEN_KEY } from 'src/common/common.constants';
 import { Module } from '@nestjs/common';
 import { PaymentsModule } from './payments/payments.module';
 import { Payment } from 'src/payments/entities/payment.entity';
+import { ScheduleModule } from '@nestjs/schedule';
 
 // console.log('JOI', Joi);
 @Module({
@@ -85,6 +86,7 @@ import { Payment } from 'src/payments/entities/payment.entity';
         };
       },
     }),
+    ScheduleModule.forRoot(),
     JwtModule.forRoot({ privateKey: process.env.PRIVATE_KEY }),
     MailModule.forRoot({
       apiKey: process.env.MAILGUN_API_KEY,
