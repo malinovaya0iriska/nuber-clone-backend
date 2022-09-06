@@ -4,10 +4,11 @@ import { Payment } from 'src/payments/entities/payment.entity';
 import { Repository } from 'typeorm';
 import {
   CreatePaymentInput,
-  CreatePaymentOuput,
+  CreatePaymentOutput,
 } from 'src/payments/dtos/create-payment.dto';
 import { User } from 'src/users/entities/user.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import { GetPaymentOutput } from 'src/payments/dtos/get-payments.dto';
 
 @Injectable()
 export class PaymentService {
@@ -21,7 +22,7 @@ export class PaymentService {
   async createPayment(
     owner: User,
     { transactionID, restaurantID }: CreatePaymentInput,
-  ): Promise<CreatePaymentOuput> {
+  ): Promise<CreatePaymentOutput> {
     try {
       const restaurant = await this.restaurants.findOneBy({ id: restaurantID });
       if (!restaurant) {
@@ -51,6 +52,24 @@ export class PaymentService {
       return {
         ok: false,
         error: "Couldn't create this payment. Try again",
+      };
+    }
+  }
+
+  async getPayments(user: User): Promise<GetPaymentOutput> {
+    try {
+      const payments = await this.payments.find({
+        where: { user: { id: user.id } },
+      });
+
+      return {
+        ok: true,
+        payments,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: "Could't load payments",
       };
     }
   }

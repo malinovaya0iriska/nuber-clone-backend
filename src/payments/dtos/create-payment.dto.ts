@@ -9,4 +9,4 @@ export class CreatePaymentInput extends PickType(Payment, [
 ]) {}
 
 @ObjectType()
-export class CreatePaymentOuput extends CoreOutput {}
+export class CreatePaymentOutput extends CoreOutput {}
