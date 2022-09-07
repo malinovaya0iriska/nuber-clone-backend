@@ -68,7 +68,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      playground: process.env.NODE_ENV !== 'production',
+      playground: process.env.NODE_ENV !== 'prod',
       autoSchemaFile: true,
       subscriptions: {
         'subscriptions-transport-ws': {

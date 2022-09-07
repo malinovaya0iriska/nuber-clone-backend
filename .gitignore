@@ -76,7 +76,7 @@ web_modules/
 .env
 .env.dev
 .env.test
-.env.production.local
+.env.prod
 .env.local
 
 # parcel-bundler cache (https://parceljs.org/)
