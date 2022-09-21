@@ -89,7 +89,7 @@ export class RestaurantResolver {
   restaurants(
     @Args('input') restaurantsInput: RestaurantsInput,
   ): Promise<RestaurantsOutput> {
-    return this.restaurantService.getAllRestaurants(restaurantsInput);
+    return this.restaurantService.allRestaurants(restaurantsInput);
   }
 }
 
@@ -103,7 +103,7 @@ export class CategoryResolver {
   }
 
   @Query((returns) => AllCategoriesOutput)
-  getAllCategories(): Promise<AllCategoriesOutput> {
+  allCategories(): Promise<AllCategoriesOutput> {
     return this.restaurantService.getAllCategories();
   }
 

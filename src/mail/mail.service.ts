@@ -24,6 +24,8 @@ export class MailService {
     form.append('subject', subject);
     form.append('template', templateName);
     emailVars.forEach((eVar) => form.append(`v:${eVar.key}`, eVar.value));
+    console.log(this.options.domain, this.options.apiKey);
+    console.log(form);
 
     try {
       await got.post(
@@ -44,6 +46,7 @@ export class MailService {
   }
 
   sendVerificationEmail(email: string, code: string) {
+    console.log(email, code);
     this.sendEmail('Verify Your Email', 'verify_email', [
       { key: 'code', value: code },
       { key: 'username', value: email },

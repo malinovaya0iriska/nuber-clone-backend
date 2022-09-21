@@ -186,11 +186,10 @@ export class RestaurantService {
       };
     }
   }
-  async getAllRestaurants({
-    page,
-  }: RestaurantsInput): Promise<RestaurantsOutput> {
+  async allRestaurants({ page }: RestaurantsInput): Promise<RestaurantsOutput> {
     try {
       const [restaurants, totalResults] = await this.restaurants.findAndCount({
+        relations: ['category'],
         skip: --page * AMOUNT_PER_PAGE,
         take: AMOUNT_PER_PAGE,
         order: {
@@ -217,7 +216,7 @@ export class RestaurantService {
     try {
       const restaurant = await this.restaurants.findOne({
         where: { id: restarauntId },
-        relations: ['menu'],
+        relations: ['menu', 'category'],
       });
       if (!restaurant) {
         return {
