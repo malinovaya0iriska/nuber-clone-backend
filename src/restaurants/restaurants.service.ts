@@ -43,6 +43,11 @@ import {
   DeleteDishInput,
   DeleteDishOutput,
 } from 'src/restaurants/dtos/delete-dish.dto';
+import {
+  MyRestaurantInput,
+  MyRestaurantOutput,
+} from 'src/restaurants/dtos/my-restaurant.dto';
+import { MyRestaurantsOutput } from 'src/restaurants/dtos/my-restaurants.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -169,6 +174,9 @@ export class RestaurantService {
         where: { category: { slug } },
         take: AMOUNT_PER_PAGE,
         skip: --page * AMOUNT_PER_PAGE,
+        order: {
+          isPromoted: 'DESC',
+        },
       });
 
       category.restaurants = restaurants;
@@ -176,6 +184,7 @@ export class RestaurantService {
 
       return {
         ok: true,
+        restaurants,
         category,
         totalPages: Math.ceil(totalResults / AMOUNT_PER_PAGE),
       };
@@ -245,6 +254,7 @@ export class RestaurantService {
         where: { name: ILike(`%${query}%`) },
         skip: --page * AMOUNT_PER_PAGE,
         take: AMOUNT_PER_PAGE,
+        relations: ['category'],
       });
 
       return {
@@ -352,6 +362,51 @@ export class RestaurantService {
       return { ok: true };
     } catch (error) {
       return { ok: false, error: 'Could not edit a dish' };
+    }
+  }
+
+  async myRestaurants(owner: User, { page = 1 }): Promise<MyRestaurantsOutput> {
+    try {
+      const [restaurants, totalResults] = await this.restaurants.findAndCount({
+        where: { owner: { id: owner.id } },
+        skip: --page * AMOUNT_PER_PAGE,
+        take: AMOUNT_PER_PAGE,
+        order: {
+          isPromoted: 'DESC',
+        },
+      });
+
+      return {
+        ok: true,
+        restaurants,
+        totalPages: Math.ceil(totalResults / AMOUNT_PER_PAGE),
+        totalResults,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: 'Could not find restaurants.',
+      };
+    }
+  }
+  async myRestaurant(
+    owner: User,
+    { id }: MyRestaurantInput,
+  ): Promise<MyRestaurantOutput> {
+    try {
+      const restaurant = await this.restaurants.findOne({
+        where: { ownerId: owner.id, id },
+        relations: ['menu', 'orders'],
+      });
+      return {
+        restaurant,
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: 'Could not find restaurant',
+      };
     }
   }
 }
