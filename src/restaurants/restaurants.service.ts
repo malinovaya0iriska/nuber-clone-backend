@@ -396,9 +396,22 @@ export class RestaurantService {
   ): Promise<MyRestaurantOutput> {
     try {
       const restaurant = await this.restaurants.findOne({
-        where: { ownerId: owner.id, id },
+        where: { id },
         relations: ['menu', 'orders'],
       });
+      if (!restaurant) {
+        return {
+          ok: false,
+          error: 'Restaurant is not found',
+        };
+      }
+      if (restaurant.ownerId !== owner.id) {
+        return {
+          ok: false,
+          error: "You don't own this restaurant",
+        };
+      }
+
       return {
         restaurant,
         ok: true,
