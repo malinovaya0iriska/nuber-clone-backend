@@ -24,6 +24,7 @@ import { Module } from '@nestjs/common';
 import { PaymentsModule } from './payments/payments.module';
 import { Payment } from 'src/payments/entities/payment.entity';
 import { ScheduleModule } from '@nestjs/schedule';
+import { UploadsModule } from './uploads/uploads.module';
 
 // console.log('JOI', Joi);
 @Module({
@@ -99,6 +100,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     OrdersModule,
     CommonModule,
     PaymentsModule,
+    UploadsModule,
   ],
   controllers: [],
   providers: [],
