@@ -73,17 +73,19 @@ import { UploadsModule } from './uploads/uploads.module';
       autoSchemaFile: true,
       subscriptions: {
         'subscriptions-transport-ws': {
-          path: '/graphql',
           onConnect: (connectionParams): { token: string } => {
             return { token: connectionParams[TOKEN_KEY] };
           },
         },
       },
-      context: (params): { token: string } => {
-        const { req } = params;
+      context: async ({ req, connectionParams }) => {
+        if (req) {
+          const headers = await req.get(TOKEN_KEY);
+          return { token: headers };
+        }
 
         return {
-          token: req.headers[TOKEN_KEY],
+          token: connectionParams[TOKEN_KEY],
         };
       },
     }),

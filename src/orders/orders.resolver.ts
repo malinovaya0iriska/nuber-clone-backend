@@ -2,7 +2,6 @@ import { Inject } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
 import { AuthUser } from 'src/auth/auth-user.decorator';
-import { AuthGuard } from 'src/auth/auth.guard';
 import { Role } from 'src/auth/role.decorator';
 import {
   NEW_COOKED_ORDER,

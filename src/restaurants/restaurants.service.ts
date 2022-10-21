@@ -221,7 +221,7 @@ export class RestaurantService {
   }
 
   async findRestaurantById({
-    restarauntId,
+    id: restarauntId,
   }: RestaurantInput): Promise<RestaurantOutput> {
     try {
       const restaurant = await this.restaurants.findOne({

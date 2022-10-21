@@ -253,7 +253,7 @@ export class OrderService {
         },
       ]);
 
-      const newOrder = { ...order, status };
+      const newOrder = { ...order, orderStatus: status };
 
       if (user.role === UserRole.Owner) {
         if (status === OrderStatus.Cooked) {
